@@ -1,13 +1,1052 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>multiplication-app</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>הרפתקת הכפל! 🌟</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;800;900&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body { font-family: 'Rubik', 'Segoe UI', system-ui, sans-serif; direction: rtl; }
+
+  @keyframes confetti-fall {
+    0%   { transform: translateY(-30px) rotate(0deg);   opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+  @keyframes pop-in {
+    0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+    65%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(24px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  @keyframes wiggle {
+    0%,100% { transform: rotate(0deg); }
+    25%     { transform: rotate(-12deg); }
+    75%     { transform: rotate(12deg); }
+  }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 6px 20px rgba(124,58,237,0.35); }
+    50%     { box-shadow: 0 6px 30px rgba(124,58,237,0.75); }
+  }
+  @keyframes bounce-in {
+    0%   { transform: scale(0.5); opacity:0; }
+    60%  { transform: scale(1.1); opacity:1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes reveal-group {
+    0%   { transform: scale(0); opacity: 0; }
+    70%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes addition-appear {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .pop-in       { animation: pop-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .slide-up     { animation: slide-up 0.35s ease both; }
+  .wiggle       { animation: wiggle 0.6s ease infinite; }
+  .bounce-in    { animation: bounce-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .reveal-group { animation: reveal-group 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .addition-appear { animation: addition-appear 0.35s ease both; }
+
+  .confetti-piece {
+    position: fixed; pointer-events: none;
+    animation: confetti-fall linear both;
+  }
+
+  .num-btn {
+    width: 68px; height: 68px; border-radius: 18px;
+    font-weight: 900; font-size: 1.5rem; border: none; cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+    touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  }
+  .num-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,0.15); }
+  .num-btn:active { transform: translateY(3px);  box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+
+  .answer-box {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border: 4px solid rgba(255,255,255,0.5); border-radius: 22px;
+    width: 190px; height: 72px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.8rem; font-weight: 900; color: white; letter-spacing: 6px;
+    animation: pulse-border 1.8s ease-in-out infinite;
+    box-shadow: 0 6px 20px rgba(124,58,237,0.45); direction: ltr;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .action-btn {
+    width: 100%; padding: 16px; border-radius: 22px; border: none;
+    font-weight: 900; font-size: 1.15rem; color: white; cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    touch-action: manipulation; font-family: 'Rubik', sans-serif;
+  }
+  .action-btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,0.2); }
+  .action-btn:active { transform: translateY(4px);  box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+  .action-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .icon-btn {
+    border: none; border-radius: 14px; padding: 8px 12px;
+    font-weight: 900; cursor: pointer; background: rgba(255,255,255,0.3);
+    color: white; transition: background 0.15s; font-family: 'Rubik', sans-serif;
+    font-size: 0.85rem; touch-action: manipulation;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.45); }
+
+  .emoji-group {
+    display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
+    border-radius: 14px; padding: 7px; min-width: 50px;
+  }
+
+  .expl-group {
+    border-radius: 16px; padding: 8px; min-width: 60px; text-align: center;
+    transition: all 0.3s ease; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .expl-group.hidden  { background: #f3f4f6; border: 2px dashed #d1d5db; }
+  .expl-group.next    { background: #fef9c3; border: 2px dashed #fbbf24; }
+  .expl-group.visible { background: #dcfce7; border: 2px solid #86efac; }
+
+  .no-scroll::-webkit-scrollbar { display: none; }
+  .no-scroll { scrollbar-width: none; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px; overflow-y: auto;
+  }
+
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+
+  input[type="text"] {
+    font-family: 'Rubik', sans-serif;
+    border: 3px solid #e5e7eb; outline: none; border-radius: 16px;
+    padding: 14px 16px; font-size: 1.2rem; font-weight: 800;
+    text-align: center; width: 100%; transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: #8b5cf6; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+
+const DEFAULT_STATS = Array.from({length:5}, () => ({done:0, correct:0}));
+
+const LEVELS = [
+  null,
+  { multipliers:[1,2],  name:"מתחילים!",           badge:"🌱", bg:"from-emerald-400 to-teal-500"   },
+  { multipliers:[3,4],  name:"הולך וטוב!",          badge:"🌊", bg:"from-sky-400 to-blue-500"        },
+  { multipliers:[5,6],  name:"לומד/ת על!",          badge:"🦋", bg:"from-violet-400 to-purple-500"   },
+  { multipliers:[7,8],  name:"גיבור/ת מתמטיקה!",   badge:"🦁", bg:"from-orange-400 to-amber-500"    },
+  { multipliers:[9,10], name:"אלוף/ת הכפל!",        badge:"👑", bg:"from-pink-400 to-rose-500"       },
+];
+
+const SCENARIOS = [
+  { t:(a,b)=>`יש לך ${a} סלים 🧺 ובכל סל יש ${b} תפוחים 🍎. כמה תפוחים יש לך בסך הכל?`,        e:"🍎", s:"תפוחים"    },
+  { t:(a,b)=>`${a} חברים מביאים ${b} מכוניות צעצוע 🚗 כל אחד. כמה מכוניות יש בסך הכל?`,         e:"🚗", s:"מכוניות"   },
+  { t:(a,b)=>`יש ${a} צלחות 🍽️ ועל כל צלחת יש ${b} עוגיות 🍪. כמה עוגיות יש בסך הכל?`,         e:"🍪", s:"עוגיות"    },
+  { t:(a,b)=>`על ${a} עצים 🌳 יושבים ${b} ציפורים 🐦 על כל עץ. כמה ציפורים יש?`,                e:"🐦", s:"ציפורים"   },
+  { t:(a,b)=>`אתה רואה ${a} חמניות 🌻 ולכל אחת יש ${b} עלי כותרת. כמה עלי כותרת יש?`,           e:"🌸", s:"עלי כותרת" },
+  { t:(a,b)=>`${a} ילדים מקבלים ${b} בלונים 🎈 כל אחד. כמה בלונים יש בסך הכל?`,                 e:"🎈", s:"בלונים"    },
+  { t:(a,b)=>`יש ${a} קופסאות מתנה 🎁 ובכל אחת יש ${b} סוכריות 🍬. כמה סוכריות בסך הכל?`,       e:"🍬", s:"סוכריות"   },
+  { t:(a,b)=>`${a} קופים 🐒 מצאו ${b} בננות 🍌 כל אחד. כמה בננות יש בסך הכל?`,                  e:"🍌", s:"בננות"     },
+  { t:(a,b)=>`יש לך ${a} תיקים 🎒 ושמת בכל אחד ${b} צבעים 🖍️. כמה צבעים יש בסך הכל?`,          e:"🖍️",s:"צבעים"     },
+  { t:(a,b)=>`${a} ברווזים 🦆 שוחים עם ${b} אפרוחים כל אחד. כמה אפרוחים יש בסך הכל?`,           e:"🐤", s:"אפרוחים"   },
+  { t:(a,b)=>`יש ${a} אקווריומים עם ${b} דגים 🐠 בכל אחד. כמה דגים יש בסך הכל?`,                e:"🐠", s:"דגים"      },
+  { t:(a,b)=>`${a} ארנבים 🐰 מסתירים ${b} גזרים 🥕 כל אחד. כמה גזרים מוסתרים?`,                 e:"🥕", s:"גזרים"     },
+  { t:(a,b)=>`יש ${a} פיצות 🍕 וכל אחת חתוכה ל-${b} פרוסות. כמה פרוסות יש?`,                    e:"🍕", s:"פרוסות"    },
+  { t:(a,b)=>`השקית ${a} שורות עם ${b} צמחים 🪴 בכל שורה. כמה צמחים יש?`,                        e:"🪴", s:"צמחים"     },
+  { t:(a,b)=>`לכל אחד מ-${a} הכלבים 🐶 יש ${b} צעצועים. כמה צעצועים יש בסך הכל?`,               e:"🦴", s:"צעצועים"   },
+];
+
+const CORRECT_MSGS = [
+  n => `כל הכבוד, ${n}! 🎉`,
+  _ => `מדהים! מוכשר/ת מאוד! ✨`,
+  n => `${n}, אתה/את חכם/ה כל כך! 🦄`,
+  _ => `עבודה נהדרת! 🌟`,
+  n => `${n} - אתה/את בוער/ת! 🔥`,
+  _ => `מושלם/ת לגמרי! 🏆`,
+  n => `פנומנלי, ${n}! 🚀`,
+  _ => `אתה/את הכי טוב/ה! 🎸`,
+];
+
+const CONFETTI_COLORS = ["#ff6b6b","#ffd93d","#6bcb77","#4d96ff","#ff6bb5","#a855f7","#fb923c","#22d3ee"];
+const STREAK_NEEDED = 3;
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+
+function loadAllStudents() {
+  try { return JSON.parse(localStorage.getItem("mulAdv_students")) || {}; } catch { return {}; }
+}
+function saveAllStudents(s) {
+  try { localStorage.setItem("mulAdv_students", JSON.stringify(s)); } catch {}
+}
+function loadLastStudent() {
+  return localStorage.getItem("mulAdv_lastStudent") || null;
+}
+function saveLastStudent(name) {
+  try { localStorage.setItem("mulAdv_lastStudent", name); } catch {}
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
+function makeQuestion(level) {
+  const ms = LEVELS[level].multipliers;
+  const a  = ms[Math.floor(Math.random() * ms.length)];
+  const b  = Math.floor(Math.random() * 9) + 2;
+  const s  = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+  return { a, b, answer: a * b, emoji: s.e, subject: s.s, text: s.t(a, b) };
+}
+
+function randCorrectMsg(name) {
+  return CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)](name);
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+
+function Confetti({ active }) {
+  const [pieces, setPieces] = useState([]);
+  const tid = useRef(null);
+  useEffect(() => {
+    if (!active) { setPieces([]); return; }
+    const arr = Array.from({length:55}, (_,i) => ({
+      id:i, left:Math.random()*100,
+      color:CONFETTI_COLORS[i%CONFETTI_COLORS.length],
+      w:8+Math.random()*10, h:10+Math.random()*14,
+      dur:1.3+Math.random()*1.3, delay:Math.random()*0.7,
+      round:Math.random()>0.5,
+    }));
+    setPieces(arr);
+    clearTimeout(tid.current);
+    tid.current = setTimeout(() => setPieces([]), 3000);
+    return () => clearTimeout(tid.current);
+  }, [active]);
+  return (
+    <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:999,overflow:'hidden'}}>
+      {pieces.map(p => (
+        <div key={p.id} className="confetti-piece"
+          style={{left:`${p.left}vw`,top:0,width:p.w,height:p.h,
+            background:p.color,borderRadius:p.round?'50%':3,
+            animationDuration:`${p.dur}s`,animationDelay:`${p.delay}s`}} />
+      ))}
+    </div>
+  );
+}
+
+// ── EMOJI GROUPS (question preview) ───────────────────────────────────────────
+
+function EmojiGroups({ a, b, emoji, correct }) {
+  const cap = Math.min(a, 7);
+  const bg     = correct===true?"#dcfce7":correct===false?"#fef9c3":"#f3e8ff";
+  const border = correct===true?"#86efac":correct===false?"#fde047":"#d8b4fe";
+  return (
+    <div className="flex flex-wrap justify-center gap-2 no-scroll" style={{overflowX:'auto',padding:'4px 0'}}>
+      {Array.from({length:cap}, (_,i) => (
+        <div key={i} className="emoji-group" style={{background:bg,border:`2px solid ${border}`}}>
+          {Array.from({length:b}, (_,j) => <span key={j} style={{fontSize:'1.4rem',lineHeight:1}}>{emoji}</span>)}
+        </div>
+      ))}
+      {a>cap && (
+        <div className="emoji-group" style={{background:'#f3f4f6',border:'2px solid #d1d5db',color:'#6b7280',fontWeight:900,fontSize:'0.85rem',minWidth:52}}>
+          +{a-cap}<br/>עוד
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── NUMBER PAD ─────────────────────────────────────────────────────────────────
+
+function NumberPad({ onSubmit, disabled }) {
+  const [val, setVal] = useState("");
+  const press = (k) => {
+    if (disabled) return;
+    if (k==="⌫") { setVal(v=>v.slice(0,-1)); return; }
+    if (k==="✓") { if (val!=="") { onSubmit(parseInt(val,10)); setVal(""); } return; }
+    if (val.length<3) setVal(v=>v+k);
+  };
+  const rows = [["1","2","3"],["4","5","6"],["7","8","9"],["⌫","0","✓"]];
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16}}>
+      <div className="answer-box">
+        {val||<span style={{opacity:0.4,fontSize:'1.4rem',letterSpacing:8}}>???</span>}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,68px)',gap:10,direction:'ltr'}}>
+        {rows.flat().map(k => {
+          const isOk=k==="✓", isDel=k==="⌫";
+          return (
+            <button key={k} className="num-btn"
+              style={{background:isOk?"#facc15":isDel?"#f87171":"#ffffff",
+                color:isOk?"#713f12":isDel?"#ffffff":"#6d28d9",
+                opacity:disabled?0.4:1, fontSize:isOk||isDel?'1.8rem':'1.5rem'}}
+              onClick={()=>press(k)} disabled={disabled}>{k}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── STREAK DOTS ────────────────────────────────────────────────────────────────
+
+function StreakDots({ streak }) {
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:10,flexDirection:'row-reverse'}}>
+      <span style={{color:'rgba(255,255,255,0.85)',fontWeight:800,fontSize:'0.85rem'}}>:עוד לשלב הבא</span>
+      <div style={{display:'flex',gap:8}}>
+        {Array.from({length:STREAK_NEEDED}, (_,i) => (
+          <div key={i} style={{
+            width:34,height:34,borderRadius:'50%',
+            border:`4px solid ${i<streak?'#fde68a':'rgba(255,255,255,0.45)'}`,
+            background:i<streak?'#facc15':'rgba(255,255,255,0.2)',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            transform:i<streak?'scale(1.2)':'scale(1)',
+            transition:'all 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+          }}>
+            {i<streak && <span style={{fontSize:'1rem'}}>⭐</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── STEP EXPLANATION ──────────────────────────────────────────────────────────
+
+function StepExplanation({ question, studentName, onRetry }) {
+  const { a, b, answer, emoji, subject } = question;
+  const [revealed, setRevealed] = useState(0);
+  const allRevealed = revealed >= a;
+
+  // Auto-reveal one group every 900ms
+  useEffect(() => {
+    if (revealed >= a) return;
+    const t = setTimeout(() => setRevealed(r => r + 1), 900);
+    return () => clearTimeout(t);
+  }, [revealed, a]);
+
+  const clickReveal = () => {
+    if (revealed < a) setRevealed(r => r + 1);
+  };
+
+  // Build addition string
+  const additionParts = Array.from({length: Math.min(revealed, a)}, () => b);
+  const additionStr = additionParts.join(" + ") + (allRevealed ? ` = ${answer}` : "");
+
+  const capGroups = Math.min(a, 8);
+
+  return (
+    <div className="slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16}}>
+
+      {/* Header */}
+      <div style={{textAlign:'center'}}>
+        <div style={{fontSize:'2.5rem',lineHeight:1}}>🔢</div>
+        <h3 style={{fontWeight:900,color:'#7c3aed',fontSize:'1.2rem',marginTop:6}}>
+          !בוא נספור ביחד
+        </h3>
+        <p style={{color:'#9ca3af',fontWeight:700,fontSize:'0.85rem',marginTop:2}}>
+          {allRevealed ? "ראה/י? כך זה עובד!" : `לחץ/י על הקבוצות כדי לגלות! (${revealed}/${a})`}
+        </p>
+      </div>
+
+      {/* Groups grid */}
+      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:8,width:'100%'}}>
+        {Array.from({length: capGroups}, (_, i) => {
+          const isVisible = i < revealed;
+          const isNext    = i === revealed;
+          return (
+            <div key={i}
+              onClick={isNext ? clickReveal : undefined}
+              className={`expl-group ${isVisible?'visible':isNext?'next':'hidden'} ${isVisible&&i===revealed-1?'reveal-group':''}`}
+              style={{cursor:isNext?'pointer':'default'}}>
+              <div style={{fontSize:'0.7rem',fontWeight:800,color:'#6b7280'}}>
+                {isVisible ? `קבוצה ${i+1}` : isNext ? '👆' : '?'}
+              </div>
+              {isVisible && (
+                <div style={{display:'flex',flexWrap:'wrap',gap:2,justifyContent:'center',maxWidth:72}}>
+                  {Array.from({length: Math.min(b,6)}, (_,j) => (
+                    <span key={j} style={{fontSize:'1.2rem',lineHeight:1}}>{emoji}</span>
+                  ))}
+                  {b>6 && <span style={{fontSize:'0.8rem',fontWeight:900,color:'#6d28d9'}}>+{b-6}</span>}
+                </div>
+              )}
+              {isVisible && (
+                <div style={{fontSize:'0.8rem',fontWeight:900,color:'#6d28d9'}}>{b}</div>
+              )}
+              {isNext && (
+                <div style={{fontSize:'0.75rem',fontWeight:800,color:'#d97706'}}>לחץ/י!</div>
+              )}
+            </div>
+          );
+        })}
+        {a > capGroups && (
+          <div className="expl-group" style={{background:'#f3f4f6',border:'2px dashed #d1d5db',color:'#9ca3af',fontSize:'0.85rem',fontWeight:900}}>
+            +{a-capGroups}<br/>עוד
+          </div>
+        )}
+      </div>
+
+      {/* Group labels (running list) */}
+      {revealed > 0 && (
+        <div style={{background:'#f5f3ff',borderRadius:16,padding:'10px 16px',width:'100%',maxHeight:130,overflowY:'auto'}}>
+          {Array.from({length: Math.min(revealed, a)}, (_, i) => (
+            <div key={i} className="addition-appear"
+              style={{fontSize:'0.85rem',fontWeight:700,color:'#7c3aed',
+                padding:'2px 0',borderBottom:i<revealed-1?'1px solid #ede9fe':'none'}}>
+              קבוצה {i+1}: {b} {subject}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Building addition formula */}
+      {revealed > 0 && (
+        <div className="addition-appear ltr"
+          style={{fontSize:allRevealed?'1.6rem':'1.4rem',fontWeight:900,
+            color:allRevealed?'#16a34a':'#374151',
+            background:allRevealed?'#f0fdf4':'#f3e8ff',
+            borderRadius:16,padding:'10px 20px',
+            border:`2px solid ${allRevealed?'#86efac':'#ddd8fe'}`,
+            textAlign:'center',letterSpacing:1}}>
+          {additionStr}
+        </div>
+      )}
+
+      {/* Final equation + retry */}
+      {allRevealed && (
+        <div className="pop-in" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,width:'100%'}}>
+          <div style={{background:'#ede9fe',borderRadius:18,padding:'12px 24px',textAlign:'center',width:'100%'}}>
+            <div style={{fontSize:'0.85rem',fontWeight:800,color:'#9ca3af',marginBottom:4}}>אז</div>
+            <div className="ltr" style={{fontSize:'2.2rem',fontWeight:900,color:'#7c3aed'}}>
+              {a} × {b} = <span style={{color:'#16a34a'}}>{answer}</span>
+            </div>
+          </div>
+          <p style={{fontWeight:800,color:'#d97706',fontSize:'1rem',textAlign:'center'}}>
+            עכשיו אני בטוח ש{studentName} יצליח/תצליח! 💪
+          </p>
+          <button className="action-btn" style={{background:'#f97316'}} onClick={onRetry}>
+            🚀 !רוצה לנסות שוב
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── WELCOME SCREEN ────────────────────────────────────────────────────────────
+
+function WelcomeScreen({ allStudents, onSelectStudent, onNewStudent }) {
+  const names = Object.keys(allStudents);
+  const [showInput, setShowInput] = useState(names.length === 0);
+  const [name, setName]           = useState("");
+  const [nameError, setNameError] = useState("");
+
+  const handleSubmit = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (allStudents[trimmed]) {
+      // Name exists — just switch to that student
+      onSelectStudent(trimmed);
+    } else {
+      onNewStudent(trimmed);
+    }
+  };
+
+  return (
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg, #8b5cf6 0%, #db2777 100%)',
+      display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:20}}>
+
+      <div style={{fontSize:'4rem',lineHeight:1,marginBottom:8}}>🌟</div>
+      <h1 style={{color:'white',fontWeight:900,fontSize:'1.9rem',marginBottom:24,textAlign:'center'}}>
+        הרפתקת הכפל!
+      </h1>
+
+      <div className="card slide-up" style={{maxWidth:380,width:'100%',padding:28}}>
+
+        {!showInput && names.length > 0 ? (
+          <>
+            <h2 style={{fontWeight:900,color:'#7c3aed',fontSize:'1.3rem',textAlign:'center',marginBottom:18}}>
+              שלום! מי משחק עכשיו? 👋
+            </h2>
+            <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:18}}>
+              {names.map(n => {
+                const d  = allStudents[n];
+                const lv = LEVELS[d.level] || LEVELS[1];
+                return (
+                  <button key={n} onClick={() => onSelectStudent(n)}
+                    style={{display:'flex',alignItems:'center',justifyContent:'space-between',
+                      padding:'14px 18px',borderRadius:18,border:'2px solid #e5e7eb',
+                      background:'white',cursor:'pointer',fontFamily:"'Rubik',sans-serif",
+                      transition:'all 0.15s'}}
+                    onMouseEnter={e=>e.currentTarget.style.borderColor='#8b5cf6'}
+                    onMouseLeave={e=>e.currentTarget.style.borderColor='#e5e7eb'}>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontWeight:900,fontSize:'1.1rem',color:'#374151'}}>{n}</div>
+                      <div style={{fontSize:'0.8rem',color:'#9ca3af',fontWeight:700}}>
+                        {lv.badge} שלב {d.level} — {lv.name}
+                      </div>
+                    </div>
+                    <div style={{fontSize:'1.8rem'}}>{lv.badge}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={() => { setShowInput(true); setName(""); setNameError(""); }}
+              style={{width:'100%',padding:'12px',borderRadius:16,border:'2px dashed #d1d5db',
+                background:'white',fontWeight:900,color:'#8b5cf6',cursor:'pointer',
+                fontSize:'1rem',fontFamily:"'Rubik',sans-serif"}}>
+              + תלמיד/ה חדש/ה
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 style={{fontWeight:900,color:'#7c3aed',fontSize:'1.3rem',textAlign:'center',marginBottom:6}}>
+              {names.length===0 ? "ברוך/ה הבא/ה! 👋" : "תלמיד/ה חדש/ה"}
+            </h2>
+            <p style={{color:'#6b7280',fontWeight:700,textAlign:'center',marginBottom:16,fontSize:'0.95rem'}}>
+              מה שמך?
+            </p>
+            <input type="text" value={name}
+              onChange={e => { setName(e.target.value); setNameError(""); }}
+              onKeyDown={e => e.key==='Enter' && handleSubmit()}
+              placeholder="הכנס/י את שמך כאן..."
+              autoFocus
+              style={{marginBottom:nameError?6:16}} />
+            {nameError && (
+              <p style={{color:'#dc2626',fontWeight:700,fontSize:'0.85rem',textAlign:'center',marginBottom:12}}>
+                {nameError}
+              </p>
+            )}
+            <button className="action-btn"
+              style={{background:name.trim()?'#8b5cf6':'#d1d5db'}}
+              onClick={handleSubmit} disabled={!name.trim()}>
+              בואו נתחיל! 🚀
+            </button>
+            {names.length > 0 && (
+              <button onClick={() => { setShowInput(false); setName(""); }}
+                style={{display:'block',margin:'12px auto 0',background:'none',border:'none',
+                  color:'#9ca3af',fontWeight:700,cursor:'pointer',fontSize:'0.9rem',
+                  fontFamily:"'Rubik',sans-serif"}}>
+                חזרה לרשימה
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── STUDENT SWITCHER MODAL ─────────────────────────────────────────────────────
+
+function StudentSwitcher({ allStudents, currentStudent, onSelect, onAddNew, onClose }) {
+  const names = Object.keys(allStudents);
+  return (
+    <div className="modal-overlay" onClick={e => e.target===e.currentTarget&&onClose()}>
+      <div className="card slide-up" style={{maxWidth:360,width:'100%',padding:24}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <h2 style={{fontWeight:900,color:'#7c3aed',fontSize:'1.2rem'}}>החלף/י תלמיד/ה 👤</h2>
+          <button onClick={onClose} style={{fontSize:'2rem',color:'#9ca3af',background:'none',border:'none',cursor:'pointer',lineHeight:1}}>×</button>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:16}}>
+          {names.map(n => {
+            const d  = allStudents[n];
+            const lv = LEVELS[d.level] || LEVELS[1];
+            const isCur = n===currentStudent;
+            return (
+              <button key={n} onClick={() => !isCur && onSelect(n)} disabled={isCur}
+                style={{display:'flex',justifyContent:'space-between',alignItems:'center',
+                  padding:'12px 16px',borderRadius:16,cursor:isCur?'default':'pointer',
+                  background:isCur?'#ede9fe':'white',
+                  border:`2px solid ${isCur?'#8b5cf6':'#e5e7eb'}`,
+                  fontFamily:"'Rubik',sans-serif",transition:'border-color 0.15s'}}
+                onMouseEnter={e=>!isCur&&(e.currentTarget.style.borderColor='#8b5cf6')}
+                onMouseLeave={e=>!isCur&&(e.currentTarget.style.borderColor='#e5e7eb')}>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontWeight:900,color:isCur?'#7c3aed':'#374151'}}>{n} {isCur&&"✓"}</div>
+                  <div style={{fontSize:'0.78rem',color:'#9ca3af',fontWeight:700}}>
+                    {lv.badge} שלב {d.level}
+                  </div>
+                </div>
+                <div style={{fontSize:'1.5rem'}}>{lv.badge}</div>
+              </button>
+            );
+          })}
+        </div>
+        <button className="action-btn" style={{background:'#8b5cf6'}} onClick={onAddNew}>
+          + הוסף/י תלמיד/ה חדש/ה
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── START OVER CONFIRM ────────────────────────────────────────────────────────
+
+function StartOverConfirm({ studentName, onConfirm, onCancel }) {
+  return (
+    <div className="modal-overlay">
+      <div className="card pop-in" style={{maxWidth:340,width:'100%',padding:28,textAlign:'center'}}>
+        <div style={{fontSize:'3rem',lineHeight:1,marginBottom:10}}>🔄</div>
+        <h2 style={{fontWeight:900,color:'#dc2626',fontSize:'1.2rem',marginBottom:8}}>
+          התחלה מחדש
+        </h2>
+        <p style={{color:'#374151',fontWeight:700,marginBottom:6,fontSize:'0.95rem'}}>
+          האם אתה בטוח, {studentName}?
+        </p>
+        <p style={{color:'#9ca3af',fontWeight:600,marginBottom:24,fontSize:'0.85rem',lineHeight:1.5}}>
+          כל ההתקדמות שלך תימחק<br/>ותחזור/י לשלב 1
+        </p>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={onCancel}
+            style={{flex:1,padding:'14px',borderRadius:16,border:'2px solid #e5e7eb',
+              fontWeight:900,cursor:'pointer',background:'white',color:'#374151',
+              fontFamily:"'Rubik',sans-serif",fontSize:'0.95rem'}}>
+            לא, המשך
+          </button>
+          <button onClick={onConfirm}
+            style={{flex:1,padding:'14px',borderRadius:16,border:'none',
+              fontWeight:900,cursor:'pointer',background:'#dc2626',color:'white',
+              fontFamily:"'Rubik',sans-serif",fontSize:'0.95rem',
+              boxShadow:'0 4px 0 #b91c1c'}}>
+            כן, התחל מחדש
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── LEVEL-UP MODAL ─────────────────────────────────────────────────────────────
+
+function LevelUpModal({ newLevel, studentName, onGo }) {
+  const lv = LEVELS[Math.min(newLevel, 5)];
+  return (
+    <div className="modal-overlay">
+      <div className="card pop-in" style={{maxWidth:360,width:'100%',padding:32,textAlign:'center'}}>
+        <div style={{fontSize:'5.5rem',lineHeight:1}}>{lv.badge}</div>
+        <h2 style={{fontSize:'2rem',fontWeight:900,color:'#7c3aed',marginTop:8}}>
+          !שלב {Math.min(newLevel,5)}
+        </h2>
+        <p style={{fontSize:'1.1rem',fontWeight:800,color:'#6b7280',marginTop:4}}>{lv.name}</p>
+        <div style={{fontSize:'2.2rem',margin:'14px 0'}}>🎊🌟🎊</div>
+        <p style={{color:'#9ca3af',fontWeight:700,marginBottom:20,fontSize:'0.9rem'}}>
+          {studentName}, עכשיו נתרגל × {lv.multipliers.join(" ו × ")}
+        </p>
+        <button className="action-btn" style={{background:'#8b5cf6'}} onClick={onGo}>
+          יאללה! 🚀
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── MASTER MODAL ───────────────────────────────────────────────────────────────
+
+function MasterModal({ studentName, onContinue }) {
+  return (
+    <div className="modal-overlay">
+      <div className="card pop-in" style={{maxWidth:380,width:'100%',padding:32,textAlign:'center'}}>
+        <div style={{fontSize:'5rem',lineHeight:1}}>👑</div>
+        <h2 style={{fontSize:'2rem',fontWeight:900,color:'#db2777',marginTop:8}}>
+          !{studentName} — אלוף/ה
+        </h2>
+        <p style={{fontWeight:800,color:'#6b7280',marginTop:6}}>
+          ענית נכון על 3 שאלות ברצף בשלב הקשה ביותר!
+        </p>
+        <div style={{fontSize:'2.5rem',margin:'16px 0'}}>🏆✨🌈✨🏆</div>
+        <p style={{color:'#9ca3af',fontWeight:700,marginBottom:20,fontSize:'0.9rem'}}>
+          שלטת בלוח הכפל של 9 ו-10!<br/>תמשיך/י להתאמן כדי להישאר חד/ה!
+        </p>
+        <button className="action-btn" style={{background:'#db2777'}} onClick={onContinue}>
+          ממשיכים לשחק! 🎉
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────────────
+
+function Dashboard({ stats, currentLevel, studentName, onClose, onStartOver }) {
+  const totalDone    = stats.reduce((s,p)=>s+p.done,    0);
+  const totalCorrect = stats.reduce((s,p)=>s+p.correct, 0);
+  const accuracy     = totalDone>0 ? Math.round(totalCorrect/totalDone*100) : 0;
+  return (
+    <div className="modal-overlay" style={{alignItems:'flex-start',paddingTop:16}}>
+      <div className="card slide-up" style={{maxWidth:420,width:'100%',padding:24}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <h2 style={{fontSize:'1.4rem',fontWeight:900,color:'#7c3aed'}}>
+            דוח התקדמות — {studentName} 📊
+          </h2>
+          <button onClick={onClose} style={{fontSize:'2rem',color:'#9ca3af',background:'none',border:'none',cursor:'pointer',lineHeight:1}}>×</button>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}}>
+          {[["שאלות",totalDone,"#ede9fe","#7c3aed"],["דיוק",`${accuracy}%`,"#dcfce7","#16a34a"]].map(([label,val,bg,tc]) => (
+            <div key={label} style={{background:bg,borderRadius:18,padding:'14px 10px',textAlign:'center'}}>
+              <div style={{fontSize:'1.8rem',fontWeight:900,color:tc}}>{val}</div>
+              <div style={{fontWeight:800,color:tc,opacity:0.8,fontSize:'0.85rem'}}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:20}}>
+          {LEVELS.slice(1).map((lv,idx) => {
+            const n=idx+1, st=stats[idx];
+            const a=st.done>0?Math.round(st.correct/st.done*100):0;
+            const isCur=n===currentLevel;
+            return (
+              <div key={n} style={{borderRadius:18,padding:'14px 16px',outline:isCur?'4px solid white':'none'}}
+                className={`bg-gradient-to-r ${lv.bg} text-white`}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <div>
+                    <div style={{fontWeight:900}}>{lv.badge} שלב {n} {isCur&&"📍 אתה/את פה"}</div>
+                    <div style={{fontSize:'0.8rem',opacity:0.85}}>{lv.name}</div>
+                  </div>
+                  <div style={{textAlign:'left'}}>
+                    <div style={{fontWeight:900,fontSize:'1.2rem'}}>{a}%</div>
+                    <div style={{fontSize:'0.75rem',opacity:0.85}}>{st.correct}/{st.done}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{display:'flex',gap:10}}>
+          <button className="action-btn" style={{background:'#8b5cf6',flex:2}} onClick={onClose}>
+            ממשיכים ללמוד! 📚
+          </button>
+          <button onClick={onStartOver}
+            style={{flex:1,padding:'14px',borderRadius:18,border:'2px solid #fca5a5',
+              background:'white',color:'#dc2626',fontWeight:900,cursor:'pointer',
+              fontFamily:"'Rubik',sans-serif",fontSize:'0.9rem'}}>
+            🔄 אפס
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── APP ────────────────────────────────────────────────────────────────────────
+
+function App() {
+  // ── Student state
+  const [allStudents, setAllStudents]       = useState(loadAllStudents);
+  const [currentStudent, setCurrentStudent] = useState(null);
+  const [screen, setScreen]                 = useState("welcome");
+
+  // ── Game state
+  const [level,   setLevel]  = useState(1);
+  const [streak,  setStreak] = useState(0);
+  const [stats,   setStats]  = useState(DEFAULT_STATS);
+  const [question, setQ]     = useState(() => makeQuestion(1));
+
+  // ── UI phases
+  const [phase,         setPhase]        = useState("question"); // question|feedback|explanation|levelup|master
+  const [isCorrect,     setIsCorrect]    = useState(false);
+  const [isRetrying,    setIsRetrying]   = useState(false);
+  const [pendingLevelUp,setPLU]          = useState(false);
+  const [pendingMaster, setPMaster]      = useState(false);
+  const [feedbackMsg,   setFeedbackMsg]  = useState("");
+  const [showConfetti,  setShowConfetti] = useState(false);
+
+  // ── Modal flags
+  const [showDash,       setShowDash]      = useState(false);
+  const [showSwitcher,   setShowSwitcher]  = useState(false);
+  const [showStartOver,  setShowStartOver] = useState(false);
+
+  // ── Init: restore last student
+  useEffect(() => {
+    const students = loadAllStudents();
+    const last     = loadLastStudent();
+    if (last && students[last]) {
+      const d = students[last];
+      setCurrentStudent(last);
+      setLevel(d.level);
+      setStreak(d.streak);
+      setStats(d.stats);
+      setQ(makeQuestion(d.level));
+      setScreen("game");
+    }
+  }, []);
+
+  // ── Persist current student's progress
+  useEffect(() => {
+    if (!currentStudent || screen !== "game") return;
+    setAllStudents(prev => {
+      const updated = { ...prev, [currentStudent]: { level, streak, stats } };
+      saveAllStudents(updated);
+      return updated;
+    });
+  }, [level, streak, stats, currentStudent, screen]);
+
+  // ── Helpers
+  const goNextQuestion = useCallback((lv) => {
+    setQ(makeQuestion(lv));
+    setPhase("question");
+    setIsCorrect(false);
+    setShowConfetti(false);
+    setPLU(false);
+    setPMaster(false);
+    setIsRetrying(false);
+  }, []);
+
+  const activateStudent = useCallback((name, data) => {
+    setCurrentStudent(name);
+    setLevel(data.level);
+    setStreak(data.streak);
+    setStats(data.stats);
+    setScreen("game");
+    saveLastStudent(name);
+    setQ(makeQuestion(data.level));
+    setPhase("question");
+    setIsRetrying(false);
+    setShowSwitcher(false);
+    setShowDash(false);
+  }, []);
+
+  const handleSelectStudent = useCallback((name) => {
+    const data = loadAllStudents()[name];
+    if (data) activateStudent(name, data);
+  }, [activateStudent]);
+
+  const handleNewStudent = useCallback((name) => {
+    const defaultData = { level:1, streak:0, stats:DEFAULT_STATS };
+    const newStudents  = { ...loadAllStudents(), [name]: defaultData };
+    saveAllStudents(newStudents);
+    setAllStudents(newStudents);
+    activateStudent(name, defaultData);
+  }, [activateStudent]);
+
+  // ── Game logic
+  const handleSubmit = useCallback((answer) => {
+    const correct   = answer === question.answer;
+    const newStreak = correct ? streak + 1 : 0;
+    const doLevelUp = correct && newStreak >= STREAK_NEEDED && level < 5;
+    const doMaster  = correct && newStreak >= STREAK_NEEDED && level === 5;
+
+    setStats(prev => prev.map((s, i) =>
+      i === level-1 ? {done:s.done+1, correct:s.correct+(correct?1:0)} : s
+    ));
+
+    if (correct) {
+      setIsCorrect(true);
+      setStreak(doLevelUp||doMaster ? 0 : newStreak);
+      setPLU(doLevelUp);
+      setPMaster(doMaster);
+      setShowConfetti(true);
+      setFeedbackMsg(randCorrectMsg(currentStudent || ""));
+      setIsRetrying(false);
+      setPhase("feedback");
+    } else {
+      setIsCorrect(false);
+      setStreak(0);
+      setPhase("explanation");
+    }
+  }, [question, streak, level, currentStudent]);
+
+  const handleNext = useCallback(() => {
+    if (pendingLevelUp) { setPhase("levelup"); return; }
+    if (pendingMaster)  { setPhase("master");  return; }
+    goNextQuestion(level);
+  }, [pendingLevelUp, pendingMaster, level, goNextQuestion]);
+
+  const handleLevelUpGo = useCallback(() => {
+    const nl = Math.min(level + 1, 5);
+    setLevel(nl);
+    goNextQuestion(nl);
+  }, [level, goNextQuestion]);
+
+  const handleMasterContinue = useCallback(() => goNextQuestion(level), [level, goNextQuestion]);
+
+  const handleRetryAfterExplanation = useCallback(() => {
+    setIsRetrying(true);
+    setPhase("question");
+    // keep same question
+  }, []);
+
+  const handleStartOver = useCallback(() => {
+    setLevel(1);
+    setStreak(0);
+    setStats(DEFAULT_STATS);
+    setQ(makeQuestion(1));
+    setPhase("question");
+    setIsRetrying(false);
+    setShowStartOver(false);
+    setShowDash(false);
+  }, []);
+
+  // ── Render: welcome
+  if (screen === "welcome") {
+    return (
+      <WelcomeScreen
+        allStudents={allStudents}
+        onSelectStudent={handleSelectStudent}
+        onNewStudent={handleNewStudent}
+      />
+    );
+  }
+
+  // ── Render: game
+  const lv = LEVELS[level];
+
+  return (
+    <div className={`min-h-screen bg-gradient-to-br ${lv.bg}`}
+      style={{display:'flex',flexDirection:'column',alignItems:'center',
+        padding:'12px 12px 28px',minHeight:'100vh'}}>
+
+      <Confetti active={showConfetti} />
+
+      {/* Modals */}
+      {phase==="levelup" && <LevelUpModal newLevel={level+1} studentName={currentStudent} onGo={handleLevelUpGo} />}
+      {phase==="master"  && <MasterModal studentName={currentStudent} onContinue={handleMasterContinue} />}
+      {showDash    && <Dashboard stats={stats} currentLevel={level} studentName={currentStudent}
+                        onClose={()=>setShowDash(false)} onStartOver={()=>{setShowDash(false);setShowStartOver(true);}} />}
+      {showSwitcher && <StudentSwitcher allStudents={allStudents} currentStudent={currentStudent}
+                          onSelect={handleSelectStudent} onAddNew={()=>{setShowSwitcher(false);setScreen("welcome");}}
+                          onClose={()=>setShowSwitcher(false)} />}
+      {showStartOver && <StartOverConfirm studentName={currentStudent}
+                          onConfirm={handleStartOver} onCancel={()=>setShowStartOver(false)} />}
+
+      {/* ── HEADER ── */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
+        width:'100%',maxWidth:500,marginBottom:10}}>
+
+        {/* Left: Stats + StartOver */}
+        <div style={{display:'flex',flexDirection:'column',gap:5,alignItems:'flex-start'}}>
+          <button className="icon-btn" onClick={()=>setShowDash(true)}>📊 סטטיסטיקה</button>
+          <button className="icon-btn" onClick={()=>setShowStartOver(true)}
+            style={{background:'rgba(220,38,38,0.3)',fontSize:'0.78rem'}}>
+            🔄 התחל מחדש
+          </button>
+        </div>
+
+        {/* Center: mascot */}
+        <div className="wiggle" style={{fontSize:'2.4rem',cursor:'default'}}>🧮</div>
+
+        {/* Right: Level + Student name */}
+        <button onClick={()=>setShowSwitcher(true)}
+          style={{background:'rgba(255,255,255,0.3)',border:'none',borderRadius:18,
+            padding:'8px 14px',textAlign:'right',cursor:'pointer',fontFamily:"'Rubik',sans-serif"}}>
+          <div style={{fontWeight:900,color:'white',fontSize:'0.95rem'}}>{lv.badge} שלב {level}</div>
+          <div style={{fontWeight:800,color:'rgba(255,255,255,0.8)',fontSize:'0.75rem'}}>
+            👤 {currentStudent} ▾
+          </div>
+        </button>
+      </div>
+
+      {/* ── STREAK ── */}
+      <div style={{marginBottom:12}}>
+        <StreakDots streak={streak} />
+      </div>
+
+      {/* ── MAIN CARD ── */}
+      <div className="card" style={{width:'100%',maxWidth:500,padding:24}}>
+
+        {/* QUESTION PHASE */}
+        {phase==="question" && (
+          <div key="q" className="slide-up"
+            style={{display:'flex',flexDirection:'column',alignItems:'center',gap:18}}>
+
+            {/* Retry encouragement banner */}
+            {isRetrying && (
+              <div style={{background:'#fffbeb',border:'2px solid #fbbf24',borderRadius:16,
+                padding:'10px 16px',textAlign:'center',width:'100%'}}>
+                <span style={{fontWeight:900,color:'#d97706',fontSize:'1rem'}}>
+                  עכשיו {currentStudent} בטוח יצליח/תצליח! 💪
+                </span>
+              </div>
+            )}
+
+            <div style={{fontSize:'3.5rem',lineHeight:1}}>🤔</div>
+            <p style={{fontSize:'1.15rem',fontWeight:900,color:'#374151',textAlign:'center',lineHeight:1.6}}>
+              {question.text}
+            </p>
+            <div style={{width:'100%'}}>
+              <p style={{textAlign:'center',fontSize:'0.8rem',fontWeight:800,color:'#9ca3af',marginBottom:6}}>
+                {question.a} קבוצות של {question.b}:
+              </p>
+              <EmojiGroups a={question.a} b={question.b} emoji={question.emoji} correct={null} />
+            </div>
+            <NumberPad onSubmit={handleSubmit} disabled={false} />
+          </div>
+        )}
+
+        {/* FEEDBACK PHASE (correct only) */}
+        {phase==="feedback" && (
+          <div key="fb" className="slide-up"
+            style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16}}>
+            <div className="bounce-in" style={{fontSize:'4.5rem',lineHeight:1}}>🎉</div>
+            <h2 className="pop-in" style={{fontSize:'1.5rem',fontWeight:900,textAlign:'center',color:'#16a34a'}}>
+              {feedbackMsg}
+            </h2>
+            <div style={{background:'#f0fdf4',border:'2px solid #86efac',borderRadius:20,
+              padding:'16px 24px',width:'100%',textAlign:'center'}}>
+              <p style={{fontSize:'0.9rem',fontWeight:800,color:'#6b7280',marginBottom:4}}>!נכון בדיוק</p>
+              <p className="ltr" style={{fontSize:'2.2rem',fontWeight:900,color:'#16a34a',letterSpacing:2}}>
+                {question.a} × {question.b} = {question.answer}
+              </p>
+              <p style={{fontSize:'0.85rem',fontWeight:700,color:'#9ca3af',marginTop:4}}>
+                {question.a} קבוצות של {question.b} {question.emoji} = {question.answer}
+              </p>
+            </div>
+            <div style={{width:'100%'}}>
+              <p style={{textAlign:'center',fontSize:'0.8rem',fontWeight:800,color:'#9ca3af',marginBottom:6}}>
+                {question.a} קבוצות של {question.b}:
+              </p>
+              <EmojiGroups a={question.a} b={question.b} emoji={question.emoji} correct={true} />
+            </div>
+            <button className="action-btn" style={{
+              background:pendingLevelUp?'#f59e0b':pendingMaster?'#db2777':'#8b5cf6'
+            }} onClick={handleNext}>
+              {pendingLevelUp?"🎁 לראות את הפרס!":pendingMaster?"👑 לראות את הגביע!":"⬅️ שאלה הבאה!"}
+            </button>
+          </div>
+        )}
+
+        {/* EXPLANATION PHASE (wrong answer) */}
+        {phase==="explanation" && (
+          <StepExplanation
+            key="expl"
+            question={question}
+            studentName={currentStudent || ""}
+            onRetry={handleRetryAfterExplanation}
+          />
+        )}
+      </div>
+
+      <div style={{color:'rgba(255,255,255,0.5)',fontWeight:800,fontSize:'0.8rem',marginTop:14,textAlign:'center'}}>
+        !הרפתקת הכפל 🌟
+      </div>
+    </div>
+  );
+}
+
+// ── MOUNT ─────────────────────────────────────────────────────────────────────
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
 </html>
